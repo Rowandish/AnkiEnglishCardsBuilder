@@ -2,8 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="AnkiEnglishCardsBuilder.App"
              xmlns:local="using:AnkiEnglishCardsBuilder"
-             RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+             RequestedThemeVariant="Dark">
+             <!-- The app uses a custom dark surface with blue-forward accents. -->
 
     <Application.DataTemplates>
         <local:ViewLocator/>

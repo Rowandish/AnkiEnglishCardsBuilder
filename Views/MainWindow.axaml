@@ -15,7 +15,7 @@
         Height="780"
         MinWidth="1040"
         MinHeight="680"
-        Background="#F5F7FB">
+        Background="#090D14">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -23,26 +23,53 @@
 
     <Window.Styles>
         <Style Selector="Button.primary">
-            <Setter Property="Background" Value="#1F6FEB"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#38BDF8"/>
+            <Setter Property="Foreground" Value="#06111F"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Padding" Value="16,10"/>
             <Setter Property="CornerRadius" Value="8"/>
         </Style>
         <Style Selector="Button.secondary">
-            <Setter Property="Background" Value="#E8EEF9"/>
-            <Setter Property="Foreground" Value="#183153"/>
+            <Setter Property="Background" Value="#111827"/>
+            <Setter Property="Foreground" Value="#93C5FD"/>
+            <Setter Property="BorderBrush" Value="#1E3A5F"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="14,10"/>
             <Setter Property="CornerRadius" Value="8"/>
         </Style>
         <Style Selector="TextBlock.muted">
-            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="Foreground" Value="#7EA6D9"/>
         </Style>
         <Style Selector="Border.panel">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="#D8E0EE"/>
+            <Setter Property="Background" Value="#0E1420"/>
+            <Setter Property="BorderBrush" Value="#1D3557"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Foreground" Value="#DBEAFE"/>
+            <Setter Property="Background" Value="#0B1220"/>
+            <Setter Property="BorderBrush" Value="#264A73"/>
+            <Setter Property="SelectionBrush" Value="#2563EB"/>
+        </Style>
+        <Style Selector="DataGrid">
+            <Setter Property="Foreground" Value="#DBEAFE"/>
+            <Setter Property="Background" Value="#0B1220"/>
+            <Setter Property="BorderBrush" Value="#1D3557"/>
+        </Style>
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="#111827"/>
+            <Setter Property="Foreground" Value="#60A5FA"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="DataGridRow">
+            <Setter Property="Background" Value="#0B1220"/>
+        </Style>
+        <Style Selector="DataGridRow:nth-child(even)">
+            <Setter Property="Background" Value="#0E1726"/>
+        </Style>
+        <Style Selector="DataGridCell">
+            <Setter Property="BorderBrush" Value="#1B2C44"/>
         </Style>
     </Window.Styles>
 
@@ -52,15 +79,15 @@
                 <TextBlock Text="Anki English Cards Builder"
                            FontSize="28"
                            FontWeight="Bold"
-                           Foreground="#102033"/>
+                           Foreground="#60A5FA"/>
                 <TextBlock Text="Genera note TSV revisionabili da importare in Anki."
                            Classes="muted"
                            FontSize="14"/>
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
-                <Border Background="#EAF2FF" CornerRadius="8" Padding="12,8">
-                    <TextBlock Text="{Binding ProviderSummary}" Foreground="#1D4ED8" FontWeight="SemiBold"/>
+                <Border Background="#102A43" BorderBrush="#22D3EE" BorderThickness="1" CornerRadius="8" Padding="12,8">
+                    <TextBlock Text="{Binding ProviderSummary}" Foreground="#67E8F9" FontWeight="SemiBold"/>
                 </Border>
                 <Button Content="Settings" Classes="secondary" Click="OpenSettings_Click"/>
             </StackPanel>
@@ -70,7 +97,7 @@
             <Border Classes="panel" Padding="18">
                 <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="14">
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Parole da imparare" FontSize="18" FontWeight="SemiBold" Foreground="#102033"/>
+                        <TextBlock Text="Parole da imparare" FontSize="18" FontWeight="SemiBold" Foreground="#93C5FD"/>
                         <TextBlock Text="Separale con virgole, punto e virgola o nuove righe."
                                    Classes="muted"/>
                     </StackPanel>
@@ -82,8 +109,8 @@
                              PlaceholderText="abroad, reliable, thoughtful"
                              FontSize="15"
                              Padding="12"
-                             Background="#FBFCFE"
-                             BorderBrush="#CAD6E6"/>
+                             Background="#0B1220"
+                             BorderBrush="#264A73"/>
 
                     <StackPanel Grid.Row="2" Spacing="10">
                         <Button Content="Generate with LLM"
@@ -103,9 +130,9 @@
                         </Grid>
                     </StackPanel>
 
-                    <Border Grid.Row="3" Background="#F7FAFE" BorderBrush="#D8E0EE" BorderThickness="1" CornerRadius="8" Padding="12">
+                    <Border Grid.Row="3" Background="#0B1220" BorderBrush="#22D3EE" BorderThickness="1" CornerRadius="8" Padding="12">
                         <StackPanel Spacing="5">
-                            <TextBlock Text="{Binding StatusMessage}" FontWeight="SemiBold" Foreground="#102033" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding StatusMessage}" FontWeight="SemiBold" Foreground="#67E8F9" TextWrapping="Wrap"/>
                             <TextBlock Text="{Binding DetailMessage}" Classes="muted" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
@@ -116,7 +143,7 @@
                 <Grid RowDefinitions="Auto,*" RowSpacing="0">
                     <Grid ColumnDefinitions="*,Auto" Margin="18,16">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Preview card" FontSize="18" FontWeight="SemiBold" Foreground="#102033"/>
+                            <TextBlock Text="Preview card" FontSize="18" FontWeight="SemiBold" Foreground="#93C5FD"/>
                             <TextBlock Text="Modifica qualsiasi campo prima dell'export."
                                        Classes="muted"/>
                         </StackPanel>
@@ -137,7 +164,7 @@
                               HeadersVisibility="Column"
                               RowHeight="44"
                               BorderThickness="0"
-                              Background="White"
+                              Background="#0B1220"
                               IsReadOnly="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Word" Binding="{Binding Word, Mode=TwoWay}" Width="130"/>

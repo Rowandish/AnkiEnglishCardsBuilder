@@ -12,7 +12,7 @@
         MinWidth="520"
         MinHeight="480"
         WindowStartupLocation="CenterOwner"
-        Background="#F5F7FB">
+        Background="#090D14">
 
     <Design.DataContext>
         <vm:SettingsWindowViewModel/>
@@ -21,29 +21,36 @@
     <Window.Styles>
         <Style Selector="TextBlock.label">
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="#102033"/>
+            <Setter Property="Foreground" Value="#93C5FD"/>
         </Style>
         <Style Selector="Button.primary">
-            <Setter Property="Background" Value="#1F6FEB"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#38BDF8"/>
+            <Setter Property="Foreground" Value="#06111F"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Padding" Value="16,10"/>
             <Setter Property="CornerRadius" Value="8"/>
         </Style>
         <Style Selector="Button.secondary">
-            <Setter Property="Background" Value="#E8EEF9"/>
-            <Setter Property="Foreground" Value="#183153"/>
+            <Setter Property="Background" Value="#111827"/>
+            <Setter Property="Foreground" Value="#93C5FD"/>
+            <Setter Property="BorderBrush" Value="#1E3A5F"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="14,10"/>
             <Setter Property="CornerRadius" Value="8"/>
         </Style>
+        <Style Selector="TextBox, ComboBox, NumericUpDown">
+            <Setter Property="Foreground" Value="#DBEAFE"/>
+            <Setter Property="Background" Value="#0B1220"/>
+            <Setter Property="BorderBrush" Value="#264A73"/>
+        </Style>
     </Window.Styles>
 
-    <Border Margin="22" Padding="22" Background="White" BorderBrush="#D8E0EE" BorderThickness="1" CornerRadius="8">
+    <Border Margin="22" Padding="22" Background="#0E1420" BorderBrush="#1D3557" BorderThickness="1" CornerRadius="8">
         <Grid RowDefinitions="Auto,*,Auto" RowSpacing="18">
             <StackPanel Spacing="6">
-                <TextBlock Text="Settings" FontSize="24" FontWeight="Bold" Foreground="#102033"/>
+                <TextBlock Text="Settings" FontSize="24" FontWeight="Bold" Foreground="#60A5FA"/>
                 <TextBlock Text="Configura provider, modello e resilienza delle chiamate."
-                           Foreground="#64748B"
+                           Foreground="#7EA6D9"
                            TextWrapping="Wrap"/>
             </StackPanel>
 
@@ -62,7 +69,7 @@
                              PlaceholderText="sk-..."
                              HorizontalAlignment="Stretch"/>
                     <TextBlock Text="La chiave viene salvata localmente nel profilo utente di Windows."
-                               Foreground="#64748B"
+                               Foreground="#7EA6D9"
                                FontSize="12"
                                TextWrapping="Wrap"/>
                 </StackPanel>
