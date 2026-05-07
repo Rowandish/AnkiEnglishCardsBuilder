@@ -159,7 +159,7 @@
             </Border>
 
             <Border Grid.Column="1" Classes="panel">
-                <Grid RowDefinitions="Auto,*" RowSpacing="0">
+                <Grid RowDefinitions="Auto,Auto,*" RowSpacing="0">
                     <Grid ColumnDefinitions="*,Auto" Margin="18,16">
                         <StackPanel Spacing="4">
                             <TextBlock Text="Preview card" FontSize="18" FontWeight="SemiBold" Foreground="#93C5FD"/>
@@ -174,7 +174,29 @@
                                 IsEnabled="{Binding HasCards}"/>
                     </Grid>
 
-                    <DataGrid Grid.Row="1"
+                    <Border Grid.Row="1"
+                            IsVisible="{Binding HasCards}"
+                            Background="#0A1828"
+                            BorderBrush="#1D3557"
+                            BorderThickness="0,1,0,1"
+                            Padding="18,8">
+                        <StackPanel Orientation="Horizontal" Spacing="24">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="Totale:" Foreground="#7EA6D9" FontSize="13"/>
+                                <TextBlock Text="{Binding StatsTotal}" Foreground="#DBEAFE" FontWeight="SemiBold" FontSize="13"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="Generate:" Foreground="#7EA6D9" FontSize="13"/>
+                                <TextBlock Text="{Binding StatsGenerated}" Foreground="#4ADE80" FontWeight="SemiBold" FontSize="13"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="Errori:" Foreground="#7EA6D9" FontSize="13"/>
+                                <TextBlock Text="{Binding StatsErrors}" Foreground="#F87171" FontWeight="SemiBold" FontSize="13"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <DataGrid Grid.Row="2"
                               ItemsSource="{Binding Cards}"
                               AutoGenerateColumns="False"
                               CanUserResizeColumns="True"

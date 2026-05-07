@@ -51,6 +51,18 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public bool HasCards => Cards.Count > 0;
 
+    public int StatsTotal => Cards.Count;
+    public int StatsGenerated => Cards.Count(c => c.Status == "Generated");
+    public int StatsErrors => Cards.Count(c => c.Status == "Needs review");
+
+    private void RefreshCardStats()
+    {
+        OnPropertyChanged(nameof(StatsTotal));
+        OnPropertyChanged(nameof(StatsGenerated));
+        OnPropertyChanged(nameof(StatsErrors));
+        OnPropertyChanged(nameof(HasCards));
+    }
+
     public string ProviderSummary => $"{Settings.Provider} - {Settings.OpenAI.Model}";
 
     public async Task InitializeAsync()
@@ -93,7 +105,7 @@ public partial class MainWindowViewModel : ViewModelBase
         DetailMessage = words.Count == 0
             ? "Aggiungi parole nella textbox prima di procedere."
             : "Puoi esportarle vuote o generare significati e frasi con il provider configurato.";
-        OnPropertyChanged(nameof(HasCards));
+        RefreshCardStats();
     }
 
     [RelayCommand]
@@ -127,7 +139,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 });
             }
 
-            OnPropertyChanged(nameof(HasCards));
+            RefreshCardStats();
             var progress = new Progress<ProgressReport>(report =>
             {
                 StatusMessage = report.Message;
@@ -183,7 +195,7 @@ public partial class MainWindowViewModel : ViewModelBase
         finally
         {
             IsBusy = false;
-            OnPropertyChanged(nameof(HasCards));
+            RefreshCardStats();
         }
     }
 
