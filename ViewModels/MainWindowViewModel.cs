@@ -18,6 +18,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string inputText = "abroad, reliable, effort\nborrow, improve, thoughtful";
 
+    public int WordCount => wordParser.Parse(InputText).Count;
+
+    partial void OnInputTextChanged(string value) => OnPropertyChanged(nameof(WordCount));
+
     [ObservableProperty]
     private string statusMessage = "Incolla le parole, poi genera le card.";
 
