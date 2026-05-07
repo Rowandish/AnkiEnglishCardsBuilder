@@ -8,6 +8,6 @@ public interface ICardEnrichmentProvider
 
     Task<CardGenerationResult> EnrichAsync(
         IReadOnlyList<string> words,
-        IProgress<string> progress,
+        IProgress<ProgressReport> progress,
         CancellationToken cancellationToken);
 }

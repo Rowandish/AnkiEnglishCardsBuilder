@@ -131,8 +131,15 @@
                     </StackPanel>
 
                     <Border Grid.Row="3" Background="#0B1220" BorderBrush="#22D3EE" BorderThickness="1" CornerRadius="8" Padding="12">
-                        <StackPanel Spacing="5">
+                        <StackPanel Spacing="6">
                             <TextBlock Text="{Binding StatusMessage}" FontWeight="SemiBold" Foreground="#67E8F9" TextWrapping="Wrap"/>
+                            <ProgressBar Value="{Binding ProgressPercent}"
+                                         Maximum="100"
+                                         IsVisible="{Binding IsBusy}"
+                                         Height="6"
+                                         CornerRadius="3"
+                                         Background="#1D3557"
+                                         Foreground="#38BDF8"/>
                             <TextBlock Text="{Binding DetailMessage}" Classes="muted" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>

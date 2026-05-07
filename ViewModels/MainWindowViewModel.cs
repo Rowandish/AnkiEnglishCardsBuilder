@@ -28,6 +28,14 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool isBusy;
 
     [ObservableProperty]
+    private int progressCurrent;
+
+    [ObservableProperty]
+    private int progressTotal;
+
+    public double ProgressPercent => ProgressTotal == 0 ? 0 : (double)ProgressCurrent / ProgressTotal * 100;
+
+    [ObservableProperty]
     private bool isLogPanelVisible;
 
     [ObservableProperty]
@@ -97,6 +105,9 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         IsBusy = true;
+        ProgressCurrent = 0;
+        ProgressTotal = words.Count;
+        OnPropertyChanged(nameof(ProgressPercent));
         Cards.Clear();
         generationCts?.Dispose();
         generationCts = new CancellationTokenSource();
@@ -113,11 +124,13 @@ public partial class MainWindowViewModel : ViewModelBase
             }
 
             OnPropertyChanged(nameof(HasCards));
-            var progress = new Progress<string>(message =>
+            var progress = new Progress<ProgressReport>(report =>
             {
-                StatusMessage = message;
+                StatusMessage = report.Message;
                 DetailMessage = "Se la rete e' lenta, l'app resta reattiva. Puoi annullare la generazione.";
-                AddLog(message);
+                ProgressCurrent = report.Completed;
+                OnPropertyChanged(nameof(ProgressPercent));
+                AddLog(report.Message);
             });
 
             var provider = providerFactory.Create(Settings);
@@ -130,6 +143,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 Cards.Add(card);
             }
 
+            ProgressCurrent = ProgressTotal;
+            OnPropertyChanged(nameof(ProgressPercent));
             StatusMessage = $"Generate {Cards.Count} card.";
             DetailMessage = result.Warnings.Count == 0
                 ? "Controlla rapidamente la preview, poi esporta il TSV per Anki."

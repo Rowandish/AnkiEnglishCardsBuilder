@@ -15,7 +15,7 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
 
     public async Task<CardGenerationResult> EnrichAsync(
         IReadOnlyList<string> words,
-        IProgress<string> progress,
+        IProgress<ProgressReport> progress,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(settings.ApiKey))
@@ -40,7 +40,10 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
         for (var index = 0; index < words.Count; index += batchSize)
         {
             var batch = words.Skip(index).Take(batchSize).ToArray();
-            progress.Report($"Genero card {index + 1}-{index + batch.Length} di {words.Count} con {settings.Model}...");
+            progress.Report(new ProgressReport(
+                $"Genero card {index + 1}-{index + batch.Length} di {words.Count} con {settings.Model}...",
+                index,
+                words.Count));
 
             var result = await SendBatchWithRetriesAsync(batch, timeoutCts.Token);
             cards.AddRange(result.Cards);
