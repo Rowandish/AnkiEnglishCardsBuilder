@@ -33,7 +33,7 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
         var batchSize = Math.Clamp(settings.BatchSize, 1, 25);
 
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeoutCts.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(settings.TimeoutSeconds, 10, 180)));
+        timeoutCts.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(settings.TimeoutSeconds, 10, 900)));
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
 

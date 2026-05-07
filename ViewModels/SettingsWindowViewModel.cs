@@ -16,7 +16,7 @@ public sealed partial class SettingsWindowViewModel : ViewModelBase
     private string openAiModel = "gpt-5-mini";
 
     [ObservableProperty]
-    private int timeoutSeconds = 45;
+    private int timeoutSeconds = 450;
 
     [ObservableProperty]
     private int batchSize = 10;
@@ -48,12 +48,13 @@ public sealed partial class SettingsWindowViewModel : ViewModelBase
     {
         return new AppSettings
         {
+            SettingsVersion = 2,
             Provider = Provider,
             OpenAI = new OpenAiSettings
             {
                 ApiKey = OpenAiApiKey.Trim(),
                 Model = OpenAiModel.Trim(),
-                TimeoutSeconds = Math.Clamp(TimeoutSeconds, 10, 180),
+                TimeoutSeconds = Math.Clamp(TimeoutSeconds, 10, 900),
                 BatchSize = Math.Clamp(BatchSize, 1, 25)
             }
         };

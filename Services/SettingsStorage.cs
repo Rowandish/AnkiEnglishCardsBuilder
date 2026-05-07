@@ -30,8 +30,10 @@ public sealed class SettingsStorage
         try
         {
             await using var stream = File.OpenRead(settingsPath);
-            return await JsonSerializer.DeserializeAsync<AppSettings>(stream, JsonOptions, cancellationToken)
-                   ?? new AppSettings();
+            var settings = await JsonSerializer.DeserializeAsync<AppSettings>(stream, JsonOptions, cancellationToken)
+                           ?? new AppSettings();
+
+            return Migrate(settings);
         }
         catch
         {
@@ -43,5 +45,16 @@ public sealed class SettingsStorage
     {
         await using var stream = File.Create(settingsPath);
         await JsonSerializer.SerializeAsync(stream, settings, JsonOptions, cancellationToken);
+    }
+
+    private static AppSettings Migrate(AppSettings settings)
+    {
+        if (settings.SettingsVersion < 2 && settings.OpenAI.TimeoutSeconds == 45)
+        {
+            settings.OpenAI.TimeoutSeconds = 450;
+        }
+
+        settings.SettingsVersion = 2;
+        return settings;
     }
 }

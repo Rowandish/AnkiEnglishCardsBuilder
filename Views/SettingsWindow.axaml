@@ -87,8 +87,8 @@
                         <TextBlock Text="Timeout seconds" Classes="label"/>
                         <NumericUpDown Value="{Binding TimeoutSeconds, Mode=TwoWay}"
                                        Minimum="10"
-                                       Maximum="180"
-                                       Increment="5"/>
+                                       Maximum="900"
+                                       Increment="30"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Spacing="6">
