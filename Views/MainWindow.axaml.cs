@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using AnkiEnglishCardsBuilder.ViewModels;
@@ -14,8 +15,14 @@ public partial class MainWindow : Window
             if (DataContext is MainWindowViewModel viewModel)
             {
                 await viewModel.InitializeAsync();
+                viewModel.Logs.CollectionChanged += OnLogsChanged;
             }
         };
+    }
+
+    private void OnLogsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        LogScrollViewer.ScrollToEnd();
     }
 
     private async void OpenSettings_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
