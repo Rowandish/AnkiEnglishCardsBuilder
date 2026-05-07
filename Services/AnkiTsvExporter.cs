@@ -17,15 +17,7 @@ public sealed class AnkiTsvExporter
             var fields = new[]
             {
                 card.Word,
-                card.PartOfSpeech,
-                card.ItalianMeaning,
-                card.EnglishDefinition,
-                card.ExampleSentence,
-                card.ExampleTranslation,
-                card.UsageNotes,
-                card.CefrLevel,
-                card.Synonyms,
-                card.Tags
+                BuildBack(card)
             };
 
             builder.AppendLine(string.Join('\t', fields.Select(CleanField)));
@@ -42,5 +34,39 @@ public sealed class AnkiTsvExporter
             .Replace('\n', ' ')
             .Replace('\r', ' ')
             .Trim();
+    }
+
+    private static string BuildBack(AnkiCard card)
+    {
+        var sections = new List<string>();
+
+        AddSection(sections, "Meaning", card.ItalianMeaning);
+        AddSection(sections, "Definition", card.EnglishDefinition);
+        AddSection(sections, "Part of speech", card.PartOfSpeech);
+        AddSection(sections, "Example", card.ExampleSentence);
+        AddSection(sections, "Translation", card.ExampleTranslation);
+        AddSection(sections, "Usage notes", card.UsageNotes);
+        AddSection(sections, "Synonyms", card.Synonyms);
+
+        return string.Join("<br><br>", sections);
+    }
+
+    private static void AddSection(List<string> sections, string label, string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        sections.Add($"<b>{EscapeHtml(label)}:</b> {EscapeHtml(value)}");
+    }
+
+    private static string EscapeHtml(string value)
+    {
+        return value
+            .Replace("&", "&amp;", StringComparison.Ordinal)
+            .Replace("<", "&lt;", StringComparison.Ordinal)
+            .Replace(">", "&gt;", StringComparison.Ordinal)
+            .Replace("\"", "&quot;", StringComparison.Ordinal);
     }
 }

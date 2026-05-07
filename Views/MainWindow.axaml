@@ -174,10 +174,7 @@
                             <DataGridTextColumn Header="Example" Binding="{Binding ExampleSentence, Mode=TwoWay}" Width="280"/>
                             <DataGridTextColumn Header="Translation" Binding="{Binding ExampleTranslation, Mode=TwoWay}" Width="260"/>
                             <DataGridTextColumn Header="Usage notes" Binding="{Binding UsageNotes, Mode=TwoWay}" Width="300"/>
-                            <DataGridTextColumn Header="CEFR" Binding="{Binding CefrLevel, Mode=TwoWay}" Width="80"/>
                             <DataGridTextColumn Header="Synonyms" Binding="{Binding Synonyms, Mode=TwoWay}" Width="180"/>
-                            <DataGridTextColumn Header="Tags" Binding="{Binding Tags, Mode=TwoWay}" Width="180"/>
-                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Error" Binding="{Binding Error}" Width="260" IsReadOnly="True"/>
                         </DataGrid.Columns>
                     </DataGrid>
