@@ -1,0 +1,160 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:AnkiEnglishCardsBuilder.ViewModels"
+        xmlns:m="using:AnkiEnglishCardsBuilder.Models"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        d:DesignWidth="1240"
+        d:DesignHeight="780"
+        x:Class="AnkiEnglishCardsBuilder.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Anki English Cards Builder"
+        Width="1240"
+        Height="780"
+        MinWidth="1040"
+        MinHeight="680"
+        Background="#F5F7FB">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#1F6FEB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#E8EEF9"/>
+            <Setter Property="Foreground" Value="#183153"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+        <Style Selector="TextBlock.muted">
+            <Setter Property="Foreground" Value="#64748B"/>
+        </Style>
+        <Style Selector="Border.panel">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D8E0EE"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*" Margin="24" RowSpacing="16">
+        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+            <StackPanel Spacing="5">
+                <TextBlock Text="Anki English Cards Builder"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           Foreground="#102033"/>
+                <TextBlock Text="Genera note TSV revisionabili da importare in Anki."
+                           Classes="muted"
+                           FontSize="14"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
+                <Border Background="#EAF2FF" CornerRadius="8" Padding="12,8">
+                    <TextBlock Text="{Binding ProviderSummary}" Foreground="#1D4ED8" FontWeight="SemiBold"/>
+                </Border>
+                <Button Content="Settings" Classes="secondary" Click="OpenSettings_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnDefinitions="390,*" ColumnSpacing="16">
+            <Border Classes="panel" Padding="18">
+                <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="14">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Parole da imparare" FontSize="18" FontWeight="SemiBold" Foreground="#102033"/>
+                        <TextBlock Text="Separale con virgole, punto e virgola o nuove righe."
+                                   Classes="muted"/>
+                    </StackPanel>
+
+                    <TextBox Grid.Row="1"
+                             Text="{Binding InputText, Mode=TwoWay}"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             PlaceholderText="abroad, reliable, thoughtful"
+                             FontSize="15"
+                             Padding="12"
+                             Background="#FBFCFE"
+                             BorderBrush="#CAD6E6"/>
+
+                    <StackPanel Grid.Row="2" Spacing="10">
+                        <Button Content="Generate with LLM"
+                                Classes="primary"
+                                Command="{Binding GenerateCommand}"
+                                IsEnabled="{Binding !IsBusy}"/>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Content="Parse only"
+                                    Classes="secondary"
+                                    Command="{Binding ParseOnlyCommand}"
+                                    IsEnabled="{Binding !IsBusy}"/>
+                            <Button Grid.Column="1"
+                                    Content="Cancel"
+                                    Classes="secondary"
+                                    Command="{Binding CancelGenerationCommand}"
+                                    IsEnabled="{Binding IsBusy}"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <Border Grid.Row="3" Background="#F7FAFE" BorderBrush="#D8E0EE" BorderThickness="1" CornerRadius="8" Padding="12">
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="{Binding StatusMessage}" FontWeight="SemiBold" Foreground="#102033" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding DetailMessage}" Classes="muted" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Classes="panel">
+                <Grid RowDefinitions="Auto,*" RowSpacing="0">
+                    <Grid ColumnDefinitions="*,Auto" Margin="18,16">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Preview card" FontSize="18" FontWeight="SemiBold" Foreground="#102033"/>
+                            <TextBlock Text="Modifica qualsiasi campo prima dell'export."
+                                       Classes="muted"/>
+                        </StackPanel>
+                        <Button Grid.Column="1"
+                                Content="Export TSV"
+                                Classes="primary"
+                                VerticalAlignment="Center"
+                                Click="Export_Click"
+                                IsEnabled="{Binding HasCards}"/>
+                    </Grid>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding Cards}"
+                              AutoGenerateColumns="False"
+                              CanUserResizeColumns="True"
+                              CanUserSortColumns="True"
+                              GridLinesVisibility="Horizontal"
+                              HeadersVisibility="Column"
+                              RowHeight="44"
+                              BorderThickness="0"
+                              Background="White"
+                              IsReadOnly="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Word" Binding="{Binding Word, Mode=TwoWay}" Width="130"/>
+                            <DataGridTextColumn Header="POS" Binding="{Binding PartOfSpeech, Mode=TwoWay}" Width="95"/>
+                            <DataGridTextColumn Header="Italian" Binding="{Binding ItalianMeaning, Mode=TwoWay}" Width="170"/>
+                            <DataGridTextColumn Header="Definition" Binding="{Binding EnglishDefinition, Mode=TwoWay}" Width="260"/>
+                            <DataGridTextColumn Header="Example" Binding="{Binding ExampleSentence, Mode=TwoWay}" Width="280"/>
+                            <DataGridTextColumn Header="Translation" Binding="{Binding ExampleTranslation, Mode=TwoWay}" Width="260"/>
+                            <DataGridTextColumn Header="CEFR" Binding="{Binding CefrLevel, Mode=TwoWay}" Width="80"/>
+                            <DataGridTextColumn Header="Synonyms" Binding="{Binding Synonyms, Mode=TwoWay}" Width="180"/>
+                            <DataGridTextColumn Header="Tags" Binding="{Binding Tags, Mode=TwoWay}" Width="180"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Error" Binding="{Binding Error}" Width="260" IsReadOnly="True"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

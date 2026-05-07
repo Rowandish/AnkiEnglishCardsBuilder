@@ -1,0 +1,103 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:AnkiEnglishCardsBuilder.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="AnkiEnglishCardsBuilder.Views.SettingsWindow"
+        x:DataType="vm:SettingsWindowViewModel"
+        Title="Settings"
+        Width="560"
+        Height="520"
+        MinWidth="520"
+        MinHeight="480"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F7FB">
+
+    <Design.DataContext>
+        <vm:SettingsWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#102033"/>
+        </Style>
+        <Style Selector="Button.primary">
+            <Setter Property="Background" Value="#1F6FEB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#E8EEF9"/>
+            <Setter Property="Foreground" Value="#183153"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+    </Window.Styles>
+
+    <Border Margin="22" Padding="22" Background="White" BorderBrush="#D8E0EE" BorderThickness="1" CornerRadius="8">
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="18">
+            <StackPanel Spacing="6">
+                <TextBlock Text="Settings" FontSize="24" FontWeight="Bold" Foreground="#102033"/>
+                <TextBlock Text="Configura provider, modello e resilienza delle chiamate."
+                           Foreground="#64748B"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Spacing="14">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Provider" Classes="label"/>
+                    <ComboBox ItemsSource="{Binding Providers}"
+                              SelectedItem="{Binding Provider}"
+                              HorizontalAlignment="Stretch"/>
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="OpenAI API key" Classes="label"/>
+                    <TextBox Text="{Binding OpenAiApiKey, Mode=TwoWay}"
+                             PasswordChar="*"
+                             PlaceholderText="sk-..."
+                             HorizontalAlignment="Stretch"/>
+                    <TextBlock Text="La chiave viene salvata localmente nel profilo utente di Windows."
+                               Foreground="#64748B"
+                               FontSize="12"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="OpenAI model" Classes="label"/>
+                    <ComboBox ItemsSource="{Binding OpenAiModels}"
+                              SelectedItem="{Binding OpenAiModel}"
+                              IsEditable="True"
+                              HorizontalAlignment="Stretch"/>
+                </StackPanel>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Timeout seconds" Classes="label"/>
+                        <NumericUpDown Value="{Binding TimeoutSeconds, Mode=TwoWay}"
+                                       Minimum="10"
+                                       Maximum="180"
+                                       Increment="5"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Spacing="6">
+                        <TextBlock Text="Batch size" Classes="label"/>
+                        <NumericUpDown Value="{Binding BatchSize, Mode=TwoWay}"
+                                       Minimum="1"
+                                       Maximum="25"
+                                       Increment="1"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                <Button Content="Cancel" Classes="secondary" Click="Cancel_Click"/>
+                <Button Content="Save" Classes="primary" Click="Save_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
