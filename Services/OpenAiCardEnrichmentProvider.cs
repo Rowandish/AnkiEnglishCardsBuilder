@@ -106,6 +106,10 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
                 Requirements:
                 - Keep exampleSentence short and natural.
                 - exampleTranslation must be Italian.
+                - If the item is a phrasal verb, explicitly say it in usageNotes.
+                - In usageNotes, add grammar/pattern details when relevant: required prepositions, particles,
+                  whether it is followed by a gerund (-ing), infinitive, noun, object, or a specific construction.
+                  Example: "Phrasal verb. 'Be used to' is followed by a gerund (-ing) or by a noun."
                 - synonyms should contain 0 to 4 common English synonyms as a comma-separated string.
                 - tags should be lowercase, space-separated Anki tags.
                 """,
@@ -132,6 +136,7 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
                 ["englishDefinition"] = StringSchema(),
                 ["exampleSentence"] = StringSchema(),
                 ["exampleTranslation"] = StringSchema(),
+                ["usageNotes"] = StringSchema(),
                 ["cefrLevel"] = StringSchema(),
                 ["synonyms"] = StringSchema(),
                 ["tags"] = StringSchema()
@@ -139,7 +144,7 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
             ["required"] = new JsonArray
             {
                 "word", "partOfSpeech", "italianMeaning", "englishDefinition",
-                "exampleSentence", "exampleTranslation", "cefrLevel", "synonyms", "tags"
+                "exampleSentence", "exampleTranslation", "usageNotes", "cefrLevel", "synonyms", "tags"
             }
         };
 
@@ -199,6 +204,7 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
                     EnglishDefinition = ReadString(item, "englishDefinition"),
                     ExampleSentence = ReadString(item, "exampleSentence"),
                     ExampleTranslation = ReadString(item, "exampleTranslation"),
+                    UsageNotes = ReadString(item, "usageNotes"),
                     CefrLevel = ReadString(item, "cefrLevel"),
                     Synonyms = ReadString(item, "synonyms"),
                     Tags = ReadString(item, "tags"),

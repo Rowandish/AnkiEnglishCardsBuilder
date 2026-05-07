@@ -23,6 +23,9 @@ public sealed partial class AnkiCard : ObservableObject
     private string exampleTranslation = string.Empty;
 
     [ObservableProperty]
+    private string usageNotes = string.Empty;
+
+    [ObservableProperty]
     private string cefrLevel = string.Empty;
 
     [ObservableProperty]

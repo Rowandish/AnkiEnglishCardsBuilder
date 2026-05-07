@@ -22,6 +22,7 @@ public sealed class AnkiTsvExporter
                 card.EnglishDefinition,
                 card.ExampleSentence,
                 card.ExampleTranslation,
+                card.UsageNotes,
                 card.CefrLevel,
                 card.Synonyms,
                 card.Tags
