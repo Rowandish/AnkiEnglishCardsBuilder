@@ -186,8 +186,21 @@
                               Background="#0B1220"
                               IsReadOnly="False">
                         <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Status" Width="100" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="m:AnkiCard">
+                                        <TextBlock Text="{Binding Status}"
+                                                   Foreground="{Binding StatusColor}"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   Margin="8,0"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Word" Binding="{Binding Word, Mode=TwoWay}" Width="130"/>
                             <DataGridTextColumn Header="POS" Binding="{Binding PartOfSpeech, Mode=TwoWay}" Width="95"/>
+                            <DataGridTextColumn Header="CEFR" Binding="{Binding CefrLevel, Mode=TwoWay}" Width="70"/>
                             <DataGridTextColumn Header="Italian" Binding="{Binding ItalianMeaning, Mode=TwoWay}" Width="170"/>
                             <DataGridTextColumn Header="Definition" Binding="{Binding EnglishDefinition, Mode=TwoWay}" Width="260"/>
                             <DataGridTextColumn Header="Example" Binding="{Binding ExampleSentence, Mode=TwoWay}" Width="280"/>

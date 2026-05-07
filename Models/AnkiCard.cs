@@ -39,4 +39,14 @@ public sealed partial class AnkiCard : ObservableObject
 
     [ObservableProperty]
     private string error = string.Empty;
+
+    partial void OnStatusChanged(string value) => OnPropertyChanged(nameof(StatusColor));
+
+    public string StatusColor => Status switch
+    {
+        "Generated" => "#4ADE80",
+        "Waiting"   => "#FCD34D",
+        "Pending"   => "#94A3B8",
+        _           => "#F87171"
+    };
 }
