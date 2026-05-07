@@ -110,7 +110,8 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
                 - In usageNotes, add grammar/pattern details when relevant: required prepositions, particles,
                   whether it is followed by a gerund (-ing), infinitive, noun, object, or a specific construction.
                   Example: "Phrasal verb. 'Be used to' is followed by a gerund (-ing) or by a noun."
-                - synonyms should contain 0 to 4 common English synonyms as a comma-separated string.
+                - Always evaluate whether the word has useful synonyms for an English learner.
+                - synonyms must contain 0 to 4 common English synonyms as a comma-separated string; leave it empty only when no useful synonym exists.
                 - tags should be lowercase, space-separated Anki tags.
                 """,
             ["text"] = new JsonObject
