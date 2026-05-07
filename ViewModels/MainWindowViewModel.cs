@@ -28,9 +28,14 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool isBusy;
 
     [ObservableProperty]
+    private bool isLogPanelVisible;
+
+    [ObservableProperty]
     private AppSettings settings = new();
 
     public ObservableCollection<AnkiCard> Cards { get; } = [];
+
+    public ObservableCollection<string> Logs { get; } = [];
 
     public bool HasCards => Cards.Count > 0;
 
@@ -38,8 +43,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public async Task InitializeAsync()
     {
+        AddLog("Avvio applicazione e caricamento settings.");
         Settings = await settingsStorage.LoadAsync();
         OnPropertyChanged(nameof(ProviderSummary));
+        AddLog($"Settings caricati: provider {Settings.Provider}, modello {Settings.OpenAI.Model}, timeout {Settings.OpenAI.TimeoutSeconds}s.");
     }
 
     public async Task SaveSettingsAsync(AppSettings updatedSettings)
@@ -49,12 +56,14 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(ProviderSummary));
         StatusMessage = "Settings salvati.";
         DetailMessage = "Le prossime generazioni useranno provider e modello selezionati.";
+        AddLog($"Settings salvati: provider {Settings.Provider}, modello {Settings.OpenAI.Model}, timeout {Settings.OpenAI.TimeoutSeconds}s, batch {Settings.OpenAI.BatchSize}.");
     }
 
     [RelayCommand]
     private void ParseOnly()
     {
         var words = wordParser.Parse(InputText);
+        AddLog($"Parse input: trovate {words.Count} parole uniche.");
         Cards.Clear();
 
         foreach (var word in words)
@@ -79,6 +88,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task GenerateAsync()
     {
         var words = wordParser.Parse(InputText);
+        AddLog($"Richiesta generazione: {words.Count} parole candidate.");
         if (words.Count == 0)
         {
             StatusMessage = "Nessuna parola da generare.";
@@ -107,9 +117,11 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 StatusMessage = message;
                 DetailMessage = "Se la rete e' lenta, l'app resta reattiva. Puoi annullare la generazione.";
+                AddLog(message);
             });
 
             var provider = providerFactory.Create(Settings);
+            AddLog($"Uso provider {provider.Name} con modello {Settings.OpenAI.Model}.");
             var result = await provider.EnrichAsync(words, progress, generationCts.Token);
 
             Cards.Clear();
@@ -122,16 +134,23 @@ public partial class MainWindowViewModel : ViewModelBase
             DetailMessage = result.Warnings.Count == 0
                 ? "Controlla rapidamente la preview, poi esporta il TSV per Anki."
                 : string.Join(Environment.NewLine, result.Warnings);
+            AddLog($"Generazione completata: {Cards.Count} card, {result.Warnings.Count} warning.");
+            foreach (var warning in result.Warnings)
+            {
+                AddLog("Warning: " + warning);
+            }
         }
         catch (OperationCanceledException)
         {
             StatusMessage = "Generazione annullata.";
             DetailMessage = "Le card parziali restano modificabili.";
+            AddLog("Generazione annullata dall'utente.");
         }
         catch (Exception ex)
         {
             StatusMessage = "Generazione non completata.";
             DetailMessage = ExplainException(ex);
+            AddLog("Errore generazione: " + ExplainException(ex));
 
             foreach (var card in Cards)
             {
@@ -155,6 +174,14 @@ public partial class MainWindowViewModel : ViewModelBase
         generationCts?.Cancel();
         StatusMessage = "Annullamento in corso...";
         DetailMessage = "Attendo che l'operazione corrente rilasci la connessione.";
+        AddLog("Richiesto annullamento generazione.");
+    }
+
+    [RelayCommand]
+    private void ToggleLogPanel()
+    {
+        IsLogPanelVisible = !IsLogPanelVisible;
+        AddLog(IsLogPanelVisible ? "Pannello log aperto." : "Pannello log chiuso.");
     }
 
     public async Task ExportAsync(string path)
@@ -171,12 +198,19 @@ public partial class MainWindowViewModel : ViewModelBase
             await exporter.ExportAsync(Cards, path, CancellationToken.None);
             StatusMessage = "Export completato.";
             DetailMessage = $"File pronto per Anki: {path}";
+            AddLog($"Export TSV completato: {path}");
         }
         catch (Exception ex)
         {
             StatusMessage = "Export non riuscito.";
             DetailMessage = ex.Message;
+            AddLog("Errore export: " + ex.Message);
         }
+    }
+
+    private void AddLog(string message)
+    {
+        Logs.Add($"[{DateTime.Now:HH:mm:ss}] {message}");
     }
 
     private static string ExplainException(Exception ex)

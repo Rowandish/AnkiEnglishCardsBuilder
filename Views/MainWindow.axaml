@@ -73,7 +73,7 @@
         </Style>
     </Window.Styles>
 
-    <Grid RowDefinitions="Auto,*" Margin="24" RowSpacing="16">
+    <Grid RowDefinitions="Auto,*,Auto" Margin="24" RowSpacing="16">
         <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
             <StackPanel Spacing="5">
                 <TextBlock Text="Anki English Cards Builder"
@@ -184,5 +184,46 @@
                 </Grid>
             </Border>
         </Grid>
+
+        <Border Grid.Row="2" Classes="panel">
+            <Grid RowDefinitions="Auto,Auto">
+                <Grid ColumnDefinitions="*,Auto" Margin="14,10">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="Activity log" Foreground="#93C5FD" FontWeight="SemiBold"/>
+                        <TextBlock Text="Mostra provider, batch, warning, errori e operazioni di export."
+                                   Classes="muted"
+                                   FontSize="12"/>
+                    </StackPanel>
+                    <Button Grid.Column="1"
+                            Content="Show / Hide"
+                            Classes="secondary"
+                            VerticalAlignment="Center"
+                            Command="{Binding ToggleLogPanelCommand}"/>
+                </Grid>
+
+                <Border Grid.Row="1"
+                        IsVisible="{Binding IsLogPanelVisible}"
+                        Background="#080E18"
+                        BorderBrush="#1D3557"
+                        BorderThickness="0,1,0,0"
+                        Padding="12"
+                        MaxHeight="180">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Logs}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"
+                                               FontFamily="Consolas"
+                                               FontSize="12"
+                                               Foreground="#A5B4FC"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,4"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

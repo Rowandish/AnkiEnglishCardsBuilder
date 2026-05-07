@@ -106,6 +106,8 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
                 Requirements:
                 - Keep exampleSentence short and natural.
                 - exampleTranslation must be Italian.
+                - If a word has an obvious typo or spelling mistake, correct it in the card's word field.
+                - When you correct a typo, mention the original input and the correction in usageNotes and add a short warning.
                 - If the item is a phrasal verb, explicitly say it in usageNotes.
                 - In usageNotes, add grammar/pattern details when relevant: required prepositions, particles,
                   whether it is followed by a gerund (-ing), infinitive, noun, object, or a specific construction.
