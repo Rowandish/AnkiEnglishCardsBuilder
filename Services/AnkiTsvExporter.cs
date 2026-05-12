@@ -16,7 +16,7 @@ public sealed class AnkiTsvExporter
         {
             var fields = new[]
             {
-                card.Word,
+                BuildFront(card),
                 BuildBack(card)
             };
 
@@ -36,6 +36,23 @@ public sealed class AnkiTsvExporter
             .Trim();
     }
 
+    private static string BuildFront(AnkiCard card)
+    {
+        var sections = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(card.Word))
+        {
+            sections.Add($"<b>{EscapeHtml(card.Word)}</b>");
+        }
+
+        if (!string.IsNullOrWhiteSpace(card.ExampleSentence))
+        {
+            sections.Add($"<span>{EscapeHtml(card.ExampleSentence)}</span>");
+        }
+
+        return string.Join("<br>", sections);
+    }
+
     private static string BuildBack(AnkiCard card)
     {
         var sections = new List<string>();
@@ -43,7 +60,6 @@ public sealed class AnkiTsvExporter
         AddSection(sections, "Meaning", card.ItalianMeaning);
         AddSection(sections, "Definition", card.EnglishDefinition);
         AddSection(sections, "Part of speech", card.PartOfSpeech);
-        AddSection(sections, "Example", card.ExampleSentence);
         AddSection(sections, "Translation", card.ExampleTranslation);
         AddSection(sections, "Usage notes", card.UsageNotes);
         AddSection(sections, "Synonyms", card.Synonyms);

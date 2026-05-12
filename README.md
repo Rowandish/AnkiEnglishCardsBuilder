@@ -18,7 +18,7 @@ The exported file includes Anki headers:
 #tags:english vocabulary
 ```
 
-The TSV uses Anki's Basic note shape: column 1 is `Front` and column 2 is `Back`. `Front` contains the English word; `Back` contains the other fields concatenated as formatted HTML.
+The TSV uses Anki's Basic note shape: column 1 is `Front` and column 2 is `Back`. `Front` contains the English word plus the example sentence as formatted HTML; `Back` contains meaning, definition, part of speech, translation, usage notes, and synonyms.
 
 ## Provider architecture
 
