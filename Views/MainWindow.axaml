@@ -159,7 +159,7 @@
             </Border>
 
             <Border Grid.Column="1" Classes="panel">
-                <Grid RowDefinitions="Auto,Auto,*" RowSpacing="0">
+                <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="0">
                     <Grid ColumnDefinitions="*,Auto" Margin="18,16">
                         <StackPanel Spacing="4">
                             <TextBlock Text="Preview card" FontSize="18" FontWeight="SemiBold" Foreground="#93C5FD"/>
@@ -196,8 +196,35 @@
                         </StackPanel>
                     </Border>
 
-                    <DataGrid Grid.Row="2"
+                    <Border Grid.Row="2"
+                            IsVisible="{Binding IsSearchVisible}"
+                            Background="#0B1220"
+                            BorderBrush="#1D3557"
+                            BorderThickness="0,0,0,1"
+                            Padding="18,10">
+                        <Grid ColumnDefinitions="Auto,220,*" ColumnSpacing="10" VerticalAlignment="Center">
+                            <TextBlock Text="Cerca"
+                                       Foreground="#93C5FD"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"/>
+                            <TextBox x:Name="SearchTextBox"
+                                     Grid.Column="1"
+                                     Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     PlaceholderText="word"
+                                     Padding="10,7"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding SearchStatusMessage}"
+                                       Foreground="{Binding SearchStatusColor}"
+                                       FontWeight="SemiBold"
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <DataGrid x:Name="CardsDataGrid"
+                              Grid.Row="3"
                               ItemsSource="{Binding Cards}"
+                              SelectedItem="{Binding SelectedCard, Mode=TwoWay}"
                               AutoGenerateColumns="False"
                               CanUserResizeColumns="True"
                               CanUserSortColumns="True"
@@ -225,8 +252,8 @@
                             <DataGridTextColumn Header="CEFR" Binding="{Binding CefrLevel, Mode=TwoWay}" Width="70"/>
                             <DataGridTextColumn Header="Italian" Binding="{Binding ItalianMeaning, Mode=TwoWay}" Width="170"/>
                             <DataGridTextColumn Header="Definition" Binding="{Binding EnglishDefinition, Mode=TwoWay}" Width="260"/>
-                            <DataGridTextColumn Header="Example" Binding="{Binding ExampleSentence, Mode=TwoWay}" Width="280"/>
-                            <DataGridTextColumn Header="Translation" Binding="{Binding ExampleTranslation, Mode=TwoWay}" Width="260"/>
+                            <DataGridTextColumn Header="Examples" Binding="{Binding ExampleSentence, Mode=TwoWay}" Width="320"/>
+                            <DataGridTextColumn Header="Translations" Binding="{Binding ExampleTranslation, Mode=TwoWay}" Width="300"/>
                             <DataGridTextColumn Header="Usage notes" Binding="{Binding UsageNotes, Mode=TwoWay}" Width="300"/>
                             <DataGridTextColumn Header="Synonyms" Binding="{Binding Synonyms, Mode=TwoWay}" Width="180"/>
                             <DataGridTextColumn Header="Error" Binding="{Binding Error}" Width="260" IsReadOnly="True"/>

@@ -15,6 +15,11 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly CardEnrichmentProviderFactory providerFactory = new();
     private CancellationTokenSource? generationCts;
 
+    public MainWindowViewModel()
+    {
+        Cards.CollectionChanged += (_, _) => UpdateSearchResult();
+    }
+
     [ObservableProperty]
     private string inputText = "abroad, reliable, effort\nborrow, improve, thoughtful";
 
@@ -45,6 +50,21 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private AppSettings settings = new();
 
+    [ObservableProperty]
+    private bool isSearchVisible;
+
+    [ObservableProperty]
+    private string searchText = string.Empty;
+
+    [ObservableProperty]
+    private string searchStatusMessage = string.Empty;
+
+    [ObservableProperty]
+    private string searchStatusColor = "#7EA6D9";
+
+    [ObservableProperty]
+    private AnkiCard? selectedCard;
+
     public ObservableCollection<AnkiCard> Cards { get; } = [];
 
     public ObservableCollection<string> Logs { get; } = [];
@@ -64,6 +84,8 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     public string ProviderSummary => $"{Settings.Provider} - {Settings.OpenAI.Model}";
+
+    partial void OnSearchTextChanged(string value) => UpdateSearchResult();
 
     public async Task InitializeAsync()
     {
@@ -86,8 +108,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void ParseOnly()
     {
-        var words = wordParser.Parse(InputText);
+        var parseResult = ParseAndNormalizeInput();
+        var words = parseResult.Words;
         AddLog($"Parse input: trovate {words.Count} parole uniche.");
+        AddDuplicateLog(parseResult);
         Cards.Clear();
 
         foreach (var word in words)
@@ -111,8 +135,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task GenerateAsync()
     {
-        var words = wordParser.Parse(InputText);
-        AddLog($"Richiesta generazione: {words.Count} parole candidate.");
+        var parseResult = ParseAndNormalizeInput();
+        var words = parseResult.Words;
+        AddLog($"Richiesta generazione: {words.Count} parole uniche candidate.");
+        AddDuplicateLog(parseResult);
         if (words.Count == 0)
         {
             StatusMessage = "Nessuna parola da generare.";
@@ -215,6 +241,17 @@ public partial class MainWindowViewModel : ViewModelBase
         AddLog(IsLogPanelVisible ? "Pannello log aperto." : "Pannello log chiuso.");
     }
 
+    public void OpenSearch()
+    {
+        IsSearchVisible = true;
+        UpdateSearchResult();
+    }
+
+    public void CloseSearch()
+    {
+        IsSearchVisible = false;
+    }
+
     public async Task ExportAsync(string path)
     {
         if (Cards.Count == 0)
@@ -242,6 +279,61 @@ public partial class MainWindowViewModel : ViewModelBase
     private void AddLog(string message)
     {
         Logs.Add($"[{DateTime.Now:HH:mm:ss}] {message}");
+    }
+
+    private WordParseResult ParseAndNormalizeInput()
+    {
+        var result = wordParser.ParseWithStats(InputText);
+        var normalizedInput = string.Join(Environment.NewLine, result.Words);
+
+        if (!string.Equals(InputText.Trim(), normalizedInput, StringComparison.Ordinal))
+        {
+            InputText = normalizedInput;
+        }
+
+        return result;
+    }
+
+    private void AddDuplicateLog(WordParseResult result)
+    {
+        if (result.DuplicatesRemoved > 0)
+        {
+            AddLog($"Duplicati rimossi prima dell'LLM: {result.DuplicatesRemoved}.");
+        }
+    }
+
+    private void UpdateSearchResult()
+    {
+        var query = SearchText.Trim();
+
+        if (Cards.Count == 0)
+        {
+            SelectedCard = null;
+            SearchStatusMessage = "Nessuna card nella lista.";
+            SearchStatusColor = "#7EA6D9";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            SelectedCard = null;
+            SearchStatusMessage = "Scrivi una parola da cercare.";
+            SearchStatusColor = "#7EA6D9";
+            return;
+        }
+
+        var exactMatch = Cards.FirstOrDefault(card =>
+            string.Equals(card.Word.Trim(), query, StringComparison.OrdinalIgnoreCase));
+        var partialMatch = exactMatch ?? Cards.FirstOrDefault(card =>
+            card.Word.Contains(query, StringComparison.OrdinalIgnoreCase));
+
+        SelectedCard = partialMatch;
+        SearchStatusMessage = partialMatch is null
+            ? "Non presente nella lista."
+            : exactMatch is null
+                ? $"Corrispondenza: {partialMatch.Word}"
+                : $"Trovata: {partialMatch.Word}";
+        SearchStatusColor = partialMatch is null ? "#F87171" : "#4ADE80";
     }
 
     private static string ExplainException(Exception ex)

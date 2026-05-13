@@ -28,12 +28,13 @@ public sealed class AnkiTsvExporter
 
     private static string CleanField(string value)
     {
-        return value
+        var normalized = value
+            .Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Replace('\r', '\n')
             .Replace("\t", " ", StringComparison.Ordinal)
-            .Replace("\r\n", "<br>", StringComparison.Ordinal)
-            .Replace('\n', ' ')
-            .Replace('\r', ' ')
             .Trim();
+
+        return normalized.Replace("\n", "<br>", StringComparison.Ordinal);
     }
 
     private static string BuildFront(AnkiCard card)
@@ -45,9 +46,9 @@ public sealed class AnkiTsvExporter
             sections.Add($"<b>{EscapeHtml(card.Word)}</b>");
         }
 
-        if (!string.IsNullOrWhiteSpace(card.ExampleSentence))
+        foreach (var example in SplitLines(card.ExampleSentence))
         {
-            sections.Add($"<span>{EscapeHtml(card.ExampleSentence)}</span>");
+            sections.Add($"<span>{EscapeHtml(example)}</span>");
         }
 
         return string.Join("<br>", sections);
@@ -60,7 +61,7 @@ public sealed class AnkiTsvExporter
         AddSection(sections, "Meaning", card.ItalianMeaning);
         AddSection(sections, "Definition", card.EnglishDefinition);
         AddSection(sections, "Part of speech", card.PartOfSpeech);
-        AddSection(sections, "Translation", card.ExampleTranslation);
+        AddSection(sections, "Translations", card.ExampleTranslation);
         AddSection(sections, "Usage notes", card.UsageNotes);
         AddSection(sections, "Synonyms", card.Synonyms);
 
@@ -75,6 +76,14 @@ public sealed class AnkiTsvExporter
         }
 
         sections.Add($"<b>{EscapeHtml(label)}:</b> {EscapeHtml(value)}");
+    }
+
+    private static IEnumerable<string> SplitLines(string value)
+    {
+        return value
+            .Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Replace('\r', '\n')
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 
     private static string EscapeHtml(string value)

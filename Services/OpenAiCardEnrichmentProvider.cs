@@ -107,8 +107,14 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
                 Words: {JsonSerializer.Serialize(words)}
 
                 Requirements:
-                - Keep exampleSentence short and natural.
-                - exampleTranslation must be Italian.
+                - Return exactly two English examples per card: exampleSentence1 and exampleSentence2.
+                - Keep each example short, natural, and useful on the front of an Anki card.
+                - If the word has two clearly different common meanings, use one example for each meaning.
+                - If the word has one main meaning or no useful ambiguity, use two different examples for that same meaning.
+                - If the word has more than two common meanings, cover the two most useful meanings for an English learner.
+                - exampleTranslation1 and exampleTranslation2 must be Italian and must match the two examples.
+                - Do not number the example fields; the app will number them in the card preview/export.
+                - Make italianMeaning and englishDefinition cover the meaning or meanings used in the examples.
                 - If a word has an obvious typo or spelling mistake, correct it in the card's word field.
                 - When you correct a typo, mention the original input and the correction in usageNotes and add a short warning.
                 - If the item is a phrasal verb, explicitly say it in usageNotes.
@@ -140,8 +146,10 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
                 ["partOfSpeech"] = StringSchema(),
                 ["italianMeaning"] = StringSchema(),
                 ["englishDefinition"] = StringSchema(),
-                ["exampleSentence"] = StringSchema(),
-                ["exampleTranslation"] = StringSchema(),
+                ["exampleSentence1"] = StringSchema(),
+                ["exampleSentence2"] = StringSchema(),
+                ["exampleTranslation1"] = StringSchema(),
+                ["exampleTranslation2"] = StringSchema(),
                 ["usageNotes"] = StringSchema(),
                 ["cefrLevel"] = StringSchema(),
                 ["synonyms"] = StringSchema(),
@@ -150,7 +158,8 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
             ["required"] = new JsonArray
             {
                 "word", "partOfSpeech", "italianMeaning", "englishDefinition",
-                "exampleSentence", "exampleTranslation", "usageNotes", "cefrLevel", "synonyms", "tags"
+                "exampleSentence1", "exampleSentence2", "exampleTranslation1", "exampleTranslation2",
+                "usageNotes", "cefrLevel", "synonyms", "tags"
             }
         };
 
@@ -208,8 +217,12 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
                     PartOfSpeech = ReadString(item, "partOfSpeech"),
                     ItalianMeaning = ReadString(item, "italianMeaning"),
                     EnglishDefinition = ReadString(item, "englishDefinition"),
-                    ExampleSentence = ReadString(item, "exampleSentence"),
-                    ExampleTranslation = ReadString(item, "exampleTranslation"),
+                    ExampleSentence = BuildNumberedLines(
+                        ReadString(item, "exampleSentence1"),
+                        ReadString(item, "exampleSentence2")),
+                    ExampleTranslation = BuildNumberedLines(
+                        ReadString(item, "exampleTranslation1"),
+                        ReadString(item, "exampleTranslation2")),
                     UsageNotes = ReadString(item, "usageNotes"),
                     CefrLevel = ReadString(item, "cefrLevel"),
                     Synonyms = ReadString(item, "synonyms"),
@@ -279,6 +292,16 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
         return element.TryGetProperty(propertyName, out var property)
             ? property.GetString() ?? string.Empty
             : string.Empty;
+    }
+
+    private static string BuildNumberedLines(params string[] values)
+    {
+        var lines = values
+            .Select(value => value.Trim())
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select((value, index) => $"{index + 1}. {value}");
+
+        return string.Join(Environment.NewLine, lines);
     }
 
     private static Exception BuildOpenAiException(HttpStatusCode statusCode, string body)

@@ -6,9 +6,11 @@ Avalonia desktop app for generating Anki-importable English vocabulary cards.
 
 1. Paste English words separated by commas, semicolons, or new lines.
 2. Configure the LLM provider in `Settings`.
-3. Generate cards with meaning, definition, example sentence, translation, usage notes, and synonyms.
+3. Generate cards with meaning, definition, two example sentences, translations, usage notes, and synonyms.
 4. Review and edit every field in the preview grid.
 5. Export a TSV file and import it into Anki.
+
+Parsing removes duplicate words case-insensitively before any request is sent to the LLM.
 
 The exported file includes Anki headers:
 
@@ -18,7 +20,7 @@ The exported file includes Anki headers:
 #tags:english vocabulary
 ```
 
-The TSV uses Anki's Basic note shape: column 1 is `Front` and column 2 is `Back`. `Front` contains the English word plus the example sentence as formatted HTML; `Back` contains meaning, definition, part of speech, translation, usage notes, and synonyms.
+The TSV uses Anki's Basic note shape: column 1 is `Front` and column 2 is `Back`. `Front` contains the English word plus two English example sentences as formatted HTML; `Back` contains meaning, definition, part of speech, translations, usage notes, and synonyms.
 
 ## Provider architecture
 
