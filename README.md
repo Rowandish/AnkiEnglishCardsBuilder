@@ -11,6 +11,7 @@ Avalonia desktop app for generating Anki-importable English vocabulary cards.
 5. Export a TSV file and import it into Anki.
 
 Parsing removes duplicate words case-insensitively before any request is sent to the LLM.
+The OpenAI timeout setting applies to each individual request/batch, not to the whole generation run.
 
 The exported file includes Anki headers:
 

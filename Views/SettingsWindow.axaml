@@ -49,7 +49,7 @@
         <Grid RowDefinitions="Auto,*,Auto" RowSpacing="18">
             <StackPanel Spacing="6">
                 <TextBlock Text="Settings" FontSize="24" FontWeight="Bold" Foreground="#60A5FA"/>
-                <TextBlock Text="Configura provider, modello e resilienza delle chiamate."
+                <TextBlock Text="Configure provider, model, and request resilience."
                            Foreground="#7EA6D9"
                            TextWrapping="Wrap"/>
             </StackPanel>
@@ -68,7 +68,7 @@
                              PasswordChar="*"
                              PlaceholderText="sk-..."
                              HorizontalAlignment="Stretch"/>
-                    <TextBlock Text="La chiave viene salvata localmente nel profilo utente di Windows."
+                    <TextBlock Text="The key is stored locally in your Windows user profile."
                                Foreground="#7EA6D9"
                                FontSize="12"
                                TextWrapping="Wrap"/>
@@ -84,7 +84,7 @@
 
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Timeout seconds" Classes="label"/>
+                        <TextBlock Text="Timeout per request seconds" Classes="label"/>
                         <NumericUpDown Value="{Binding TimeoutSeconds, Mode=TwoWay}"
                                        Minimum="10"
                                        Maximum="900"

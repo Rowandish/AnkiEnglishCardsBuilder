@@ -20,7 +20,7 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
     {
         if (string.IsNullOrWhiteSpace(settings.ApiKey))
         {
-            throw new InvalidOperationException("Chiave OpenAI mancante. Apri Settings e inserisci la API key.");
+            throw new InvalidOperationException("Missing OpenAI API key. Open Settings and enter the API key.");
         }
 
         if (words.Count == 0)
@@ -31,21 +31,20 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
         var cards = new List<AnkiCard>();
         var warnings = new List<string>();
         var batchSize = Math.Clamp(settings.BatchSize, 1, 25);
-
-        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeoutCts.CancelAfter(TimeSpan.FromSeconds(Math.Clamp(settings.TimeoutSeconds, 10, 900)));
+        var requestTimeout = TimeSpan.FromSeconds(Math.Clamp(settings.TimeoutSeconds, 10, 900));
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+        httpClient.Timeout = Timeout.InfiniteTimeSpan;
 
         for (var index = 0; index < words.Count; index += batchSize)
         {
             var batch = words.Skip(index).Take(batchSize).ToArray();
             progress.Report(new ProgressReport(
-                $"Genero card {index + 1}-{index + batch.Length} di {words.Count} con {settings.Model}...",
+                $"Generating cards {index + 1}-{index + batch.Length} of {words.Count} with {settings.Model}...",
                 index,
                 words.Count));
 
-            var result = await SendBatchWithRetriesAsync(batch, timeoutCts.Token);
+            var result = await SendBatchWithRetriesAsync(batch, requestTimeout, cancellationToken);
             cards.AddRange(result.Cards);
             warnings.AddRange(result.Warnings);
         }
@@ -53,7 +52,10 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
         return new CardGenerationResult(cards, warnings);
     }
 
-    private async Task<CardGenerationResult> SendBatchWithRetriesAsync(IReadOnlyList<string> words, CancellationToken cancellationToken)
+    private async Task<CardGenerationResult> SendBatchWithRetriesAsync(
+        IReadOnlyList<string> words,
+        TimeSpan requestTimeout,
+        CancellationToken cancellationToken)
     {
         const int maxAttempts = 3;
 
@@ -61,19 +63,35 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
         {
             try
             {
-                return await SendBatchAsync(words, cancellationToken);
+                return await SendBatchWithTimeoutAsync(words, requestTimeout, cancellationToken);
             }
             catch (HttpRequestException ex) when (attempt < maxAttempts && IsTransient(ex.StatusCode))
             {
                 await Task.Delay(TimeSpan.FromSeconds(attempt * 2), cancellationToken);
             }
-            catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested && attempt < maxAttempts)
+            catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
             {
+                if (attempt >= maxAttempts)
+                {
+                    throw BuildRequestTimeoutException(requestTimeout, ex);
+                }
+
                 await Task.Delay(TimeSpan.FromSeconds(attempt * 2), cancellationToken);
             }
         }
 
-        return await SendBatchAsync(words, cancellationToken);
+        throw new InvalidOperationException("The OpenAI request was not completed.");
+    }
+
+    private async Task<CardGenerationResult> SendBatchWithTimeoutAsync(
+        IReadOnlyList<string> words,
+        TimeSpan requestTimeout,
+        CancellationToken cancellationToken)
+    {
+        using var requestCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        requestCts.CancelAfter(requestTimeout);
+
+        return await SendBatchAsync(words, requestCts.Token);
     }
 
     private async Task<CardGenerationResult> SendBatchAsync(IReadOnlyList<string> words, CancellationToken cancellationToken)
@@ -200,7 +218,7 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
 
         if (string.IsNullOrWhiteSpace(outputText))
         {
-            throw new InvalidOperationException("OpenAI ha risposto senza testo utilizzabile. Riprova o cambia modello.");
+            throw new InvalidOperationException("OpenAI returned no usable text. Try again or change model.");
         }
 
         using var content = JsonDocument.Parse(outputText);
@@ -247,7 +265,7 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
             {
                 Word = word,
                 Status = "Needs review",
-                Error = "OpenAI non ha restituito contenuti per questa parola."
+                Error = "OpenAI did not return content for this word."
             });
         }
 
@@ -308,14 +326,21 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
     {
         var message = statusCode switch
         {
-            HttpStatusCode.Unauthorized => "OpenAI ha rifiutato la chiave API. Controlla la chiave nei Settings.",
-            HttpStatusCode.TooManyRequests => "OpenAI segnala rate limit o quota esaurita. Attendi qualche minuto o cambia progetto/modello.",
-            HttpStatusCode.BadRequest => "La richiesta a OpenAI non è valida. Il modello selezionato potrebbe non supportare l'output strutturato.",
-            HttpStatusCode.RequestTimeout => "Timeout verso OpenAI. Controlla la rete o aumenta il timeout nei Settings.",
-            _ => $"Errore OpenAI {(int)statusCode}: {statusCode}."
+            HttpStatusCode.Unauthorized => "OpenAI rejected the API key. Check the key in Settings.",
+            HttpStatusCode.TooManyRequests => "OpenAI reported a rate limit or exhausted quota. Wait a few minutes or change project/model.",
+            HttpStatusCode.BadRequest => "The OpenAI request is invalid. The selected model may not support structured output.",
+            HttpStatusCode.RequestTimeout => "OpenAI request timeout. Check the network or increase the timeout in Settings.",
+            _ => $"OpenAI error {(int)statusCode}: {statusCode}."
         };
 
         return new InvalidOperationException($"{message}\n\nDettagli: {TrimBody(body)}");
+    }
+
+    private static TimeoutException BuildRequestTimeoutException(TimeSpan requestTimeout, Exception innerException)
+    {
+        return new TimeoutException(
+            $"OpenAI timed out after {requestTimeout.TotalSeconds:0} seconds for a single request.",
+            innerException);
     }
 
     private static bool IsTransient(HttpStatusCode? statusCode)
@@ -330,7 +355,7 @@ public sealed class OpenAiCardEnrichmentProvider(OpenAiSettings settings, HttpCl
     {
         if (string.IsNullOrWhiteSpace(body))
         {
-            return "Nessun dettaglio restituito dal server.";
+            return "No details returned by the server.";
         }
 
         return body.Length <= 800 ? body : string.Concat(body.AsSpan(0, 800), "...");

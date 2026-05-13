@@ -80,7 +80,7 @@
                            FontSize="28"
                            FontWeight="Bold"
                            Foreground="#60A5FA"/>
-                <TextBlock Text="Genera note TSV revisionabili da importare in Anki."
+                <TextBlock Text="Generate reviewable TSV notes for Anki import."
                            Classes="muted"
                            FontSize="14"/>
             </StackPanel>
@@ -98,15 +98,15 @@
                 <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="14">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Parole da imparare" FontSize="18" FontWeight="SemiBold" Foreground="#93C5FD"/>
-                            <TextBlock Text="Separale con virgole, punto e virgola o nuove righe."
+                            <TextBlock Text="Words to learn" FontSize="18" FontWeight="SemiBold" Foreground="#93C5FD"/>
+                            <TextBlock Text="Separate them with commas, semicolons, or new lines."
                                        Classes="muted"/>
                         </StackPanel>
                         <Border Grid.Column="1" Background="#1D3557" BorderBrush="#38BDF8" BorderThickness="1"
                                 CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
                             <TextBlock Foreground="#67E8F9" FontWeight="SemiBold" FontSize="13">
                                 <TextBlock.Text>
-                                    <MultiBinding StringFormat="{}{0} parole">
+                                    <MultiBinding StringFormat="{}{0} words">
                                         <Binding Path="WordCount"/>
                                     </MultiBinding>
                                 </TextBlock.Text>
@@ -162,8 +162,8 @@
                 <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="0">
                     <Grid ColumnDefinitions="*,Auto" Margin="18,16">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Preview card" FontSize="18" FontWeight="SemiBold" Foreground="#93C5FD"/>
-                            <TextBlock Text="Modifica qualsiasi campo prima dell'export."
+                            <TextBlock Text="Card preview" FontSize="18" FontWeight="SemiBold" Foreground="#93C5FD"/>
+                            <TextBlock Text="Edit any field before export."
                                        Classes="muted"/>
                         </StackPanel>
                         <Button Grid.Column="1"
@@ -182,15 +182,15 @@
                             Padding="18,8">
                         <StackPanel Orientation="Horizontal" Spacing="24">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <TextBlock Text="Totale:" Foreground="#7EA6D9" FontSize="13"/>
+                                <TextBlock Text="Total:" Foreground="#7EA6D9" FontSize="13"/>
                                 <TextBlock Text="{Binding StatsTotal}" Foreground="#DBEAFE" FontWeight="SemiBold" FontSize="13"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <TextBlock Text="Generate:" Foreground="#7EA6D9" FontSize="13"/>
+                                <TextBlock Text="Generated:" Foreground="#7EA6D9" FontSize="13"/>
                                 <TextBlock Text="{Binding StatsGenerated}" Foreground="#4ADE80" FontWeight="SemiBold" FontSize="13"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <TextBlock Text="Errori:" Foreground="#7EA6D9" FontSize="13"/>
+                                <TextBlock Text="Errors:" Foreground="#7EA6D9" FontSize="13"/>
                                 <TextBlock Text="{Binding StatsErrors}" Foreground="#F87171" FontWeight="SemiBold" FontSize="13"/>
                             </StackPanel>
                         </StackPanel>
@@ -203,7 +203,7 @@
                             BorderThickness="0,0,0,1"
                             Padding="18,10">
                         <Grid ColumnDefinitions="Auto,220,*" ColumnSpacing="10" VerticalAlignment="Center">
-                            <TextBlock Text="Cerca"
+                            <TextBlock Text="Search"
                                        Foreground="#93C5FD"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center"/>
@@ -250,7 +250,7 @@
                             <DataGridTextColumn Header="Word" Binding="{Binding Word, Mode=TwoWay}" Width="130"/>
                             <DataGridTextColumn Header="POS" Binding="{Binding PartOfSpeech, Mode=TwoWay}" Width="95"/>
                             <DataGridTextColumn Header="CEFR" Binding="{Binding CefrLevel, Mode=TwoWay}" Width="70"/>
-                            <DataGridTextColumn Header="Italian" Binding="{Binding ItalianMeaning, Mode=TwoWay}" Width="170"/>
+                            <DataGridTextColumn Header="Meaning" Binding="{Binding ItalianMeaning, Mode=TwoWay}" Width="170"/>
                             <DataGridTextColumn Header="Definition" Binding="{Binding EnglishDefinition, Mode=TwoWay}" Width="260"/>
                             <DataGridTextColumn Header="Examples" Binding="{Binding ExampleSentence, Mode=TwoWay}" Width="320"/>
                             <DataGridTextColumn Header="Translations" Binding="{Binding ExampleTranslation, Mode=TwoWay}" Width="300"/>
@@ -268,7 +268,7 @@
                 <Grid ColumnDefinitions="*,Auto" Margin="14,10">
                     <StackPanel Spacing="2">
                         <TextBlock Text="Activity log" Foreground="#93C5FD" FontWeight="SemiBold"/>
-                        <TextBlock Text="Mostra provider, batch, warning, errori e operazioni di export."
+                        <TextBlock Text="Shows provider, batch, warnings, errors, and export operations."
                                    Classes="muted"
                                    FontSize="12"/>
                     </StackPanel>

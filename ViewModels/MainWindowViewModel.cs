@@ -28,10 +28,10 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnInputTextChanged(string value) => OnPropertyChanged(nameof(WordCount));
 
     [ObservableProperty]
-    private string statusMessage = "Incolla le parole, poi genera le card.";
+    private string statusMessage = "Paste words, then generate cards.";
 
     [ObservableProperty]
-    private string detailMessage = "Le parole possono essere separate da virgole, punto e virgola o nuove righe.";
+    private string detailMessage = "Words can be separated by commas, semicolons, or new lines.";
 
     [ObservableProperty]
     private bool isBusy;
@@ -89,10 +89,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public async Task InitializeAsync()
     {
-        AddLog("Avvio applicazione e caricamento settings.");
+        AddLog("Starting application and loading settings.");
         Settings = await settingsStorage.LoadAsync();
         OnPropertyChanged(nameof(ProviderSummary));
-        AddLog($"Settings caricati: provider {Settings.Provider}, modello {Settings.OpenAI.Model}, timeout {Settings.OpenAI.TimeoutSeconds}s.");
+        AddLog($"Settings loaded: provider {Settings.Provider}, model {Settings.OpenAI.Model}, timeout {Settings.OpenAI.TimeoutSeconds}s.");
     }
 
     public async Task SaveSettingsAsync(AppSettings updatedSettings)
@@ -100,9 +100,9 @@ public partial class MainWindowViewModel : ViewModelBase
         Settings = updatedSettings;
         await settingsStorage.SaveAsync(Settings);
         OnPropertyChanged(nameof(ProviderSummary));
-        StatusMessage = "Settings salvati.";
-        DetailMessage = "Le prossime generazioni useranno provider e modello selezionati.";
-        AddLog($"Settings salvati: provider {Settings.Provider}, modello {Settings.OpenAI.Model}, timeout {Settings.OpenAI.TimeoutSeconds}s, batch {Settings.OpenAI.BatchSize}.");
+        StatusMessage = "Settings saved.";
+        DetailMessage = "Future generations will use the selected provider and model.";
+        AddLog($"Settings saved: provider {Settings.Provider}, model {Settings.OpenAI.Model}, timeout {Settings.OpenAI.TimeoutSeconds}s, batch {Settings.OpenAI.BatchSize}.");
     }
 
     [RelayCommand]
@@ -110,7 +110,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var parseResult = ParseAndNormalizeInput();
         var words = parseResult.Words;
-        AddLog($"Parse input: trovate {words.Count} parole uniche.");
+        AddLog($"Parsed input: found {words.Count} unique words.");
         AddDuplicateLog(parseResult);
         Cards.Clear();
 
@@ -124,11 +124,11 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         StatusMessage = words.Count == 0
-            ? "Nessuna parola trovata."
-            : $"Trovate {words.Count} parole uniche.";
+            ? "No words found."
+            : $"Found {words.Count} unique words.";
         DetailMessage = words.Count == 0
-            ? "Aggiungi parole nella textbox prima di procedere."
-            : "Puoi esportarle vuote o generare significati e frasi con il provider configurato.";
+            ? "Add words to the text box before continuing."
+            : "You can export empty cards or generate meanings and examples with the configured provider.";
         RefreshCardStats();
     }
 
@@ -137,12 +137,12 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var parseResult = ParseAndNormalizeInput();
         var words = parseResult.Words;
-        AddLog($"Richiesta generazione: {words.Count} parole uniche candidate.");
+        AddLog($"Generation requested: {words.Count} unique candidate words.");
         AddDuplicateLog(parseResult);
         if (words.Count == 0)
         {
-            StatusMessage = "Nessuna parola da generare.";
-            DetailMessage = "Inserisci almeno una parola inglese.";
+            StatusMessage = "No words to generate.";
+            DetailMessage = "Enter at least one English word.";
             return;
         }
 
@@ -169,14 +169,14 @@ public partial class MainWindowViewModel : ViewModelBase
             var progress = new Progress<ProgressReport>(report =>
             {
                 StatusMessage = report.Message;
-                DetailMessage = "Se la rete e' lenta, l'app resta reattiva. Puoi annullare la generazione.";
+                DetailMessage = "If the network is slow, the app stays responsive. You can cancel generation.";
                 ProgressCurrent = report.Completed;
                 OnPropertyChanged(nameof(ProgressPercent));
                 AddLog(report.Message);
             });
 
             var provider = providerFactory.Create(Settings);
-            AddLog($"Uso provider {provider.Name} con modello {Settings.OpenAI.Model}.");
+            AddLog($"Using provider {provider.Name} with model {Settings.OpenAI.Model}.");
             var result = await provider.EnrichAsync(words, progress, generationCts.Token);
 
             Cards.Clear();
@@ -187,36 +187,47 @@ public partial class MainWindowViewModel : ViewModelBase
 
             ProgressCurrent = ProgressTotal;
             OnPropertyChanged(nameof(ProgressPercent));
-            StatusMessage = $"Generate {Cards.Count} card.";
+            StatusMessage = $"Generated {Cards.Count} cards.";
             DetailMessage = result.Warnings.Count == 0
-                ? "Controlla rapidamente la preview, poi esporta il TSV per Anki."
+                ? "Review the preview, then export the TSV for Anki."
                 : string.Join(Environment.NewLine, result.Warnings);
-            AddLog($"Generazione completata: {Cards.Count} card, {result.Warnings.Count} warning.");
+            AddLog($"Generation completed: {Cards.Count} cards, {result.Warnings.Count} warnings.");
             foreach (var warning in result.Warnings)
             {
                 AddLog("Warning: " + warning);
             }
         }
-        catch (OperationCanceledException)
+        catch (TimeoutException ex)
         {
-            StatusMessage = "Generazione annullata.";
-            DetailMessage = "Le card parziali restano modificabili.";
-            AddLog("Generazione annullata dall'utente.");
+            StatusMessage = "OpenAI request timed out.";
+            DetailMessage = ExplainException(ex);
+            AddLog("OpenAI request timeout: " + ExplainException(ex));
+
+            MarkPendingCardsAsNeedsReview("OpenAI request timeout: " + ex.Message);
+        }
+        catch (OperationCanceledException ex)
+        {
+            if (generationCts?.IsCancellationRequested == true)
+            {
+                StatusMessage = "Generation canceled.";
+                DetailMessage = "Partial cards remain editable.";
+                AddLog("Generation canceled by the user.");
+            }
+            else
+            {
+                StatusMessage = "Generation interrupted.";
+                DetailMessage = "The OpenAI request was interrupted before a response arrived. Try again or increase the timeout in Settings.";
+                AddLog("OpenAI request interrupted without manual cancellation: " + ex.Message);
+                MarkPendingCardsAsNeedsReview("OpenAI request interrupted: " + ex.Message);
+            }
         }
         catch (Exception ex)
         {
-            StatusMessage = "Generazione non completata.";
+            StatusMessage = "Generation did not complete.";
             DetailMessage = ExplainException(ex);
-            AddLog("Errore generazione: " + ExplainException(ex));
+            AddLog("Generation error: " + ExplainException(ex));
 
-            foreach (var card in Cards)
-            {
-                if (card.Status is "Waiting" or "Pending")
-                {
-                    card.Status = "Needs review";
-                    card.Error = "Generazione interrotta: " + ex.Message;
-                }
-            }
+            MarkPendingCardsAsNeedsReview("Generation interrupted: " + ex.Message);
         }
         finally
         {
@@ -229,16 +240,16 @@ public partial class MainWindowViewModel : ViewModelBase
     private void CancelGeneration()
     {
         generationCts?.Cancel();
-        StatusMessage = "Annullamento in corso...";
-        DetailMessage = "Attendo che l'operazione corrente rilasci la connessione.";
-        AddLog("Richiesto annullamento generazione.");
+        StatusMessage = "Canceling...";
+        DetailMessage = "Waiting for the current operation to release the connection.";
+        AddLog("Generation cancellation requested.");
     }
 
     [RelayCommand]
     private void ToggleLogPanel()
     {
         IsLogPanelVisible = !IsLogPanelVisible;
-        AddLog(IsLogPanelVisible ? "Pannello log aperto." : "Pannello log chiuso.");
+        AddLog(IsLogPanelVisible ? "Log panel opened." : "Log panel closed.");
     }
 
     public void OpenSearch()
@@ -256,23 +267,23 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (Cards.Count == 0)
         {
-            StatusMessage = "Nessuna card da esportare.";
-            DetailMessage = "Genera o prepara almeno una riga prima dell'export.";
+            StatusMessage = "No cards to export.";
+            DetailMessage = "Generate or prepare at least one row before exporting.";
             return;
         }
 
         try
         {
             await exporter.ExportAsync(Cards, path, CancellationToken.None);
-            StatusMessage = "Export completato.";
-            DetailMessage = $"File pronto per Anki: {path}";
-            AddLog($"Export TSV completato: {path}");
+            StatusMessage = "Export completed.";
+            DetailMessage = $"File ready for Anki: {path}";
+            AddLog($"TSV export completed: {path}");
         }
         catch (Exception ex)
         {
-            StatusMessage = "Export non riuscito.";
+            StatusMessage = "Export failed.";
             DetailMessage = ex.Message;
-            AddLog("Errore export: " + ex.Message);
+            AddLog("Export error: " + ex.Message);
         }
     }
 
@@ -298,7 +309,19 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (result.DuplicatesRemoved > 0)
         {
-            AddLog($"Duplicati rimossi prima dell'LLM: {result.DuplicatesRemoved}.");
+            AddLog($"Duplicates removed before LLM request: {result.DuplicatesRemoved}.");
+        }
+    }
+
+    private void MarkPendingCardsAsNeedsReview(string error)
+    {
+        foreach (var card in Cards)
+        {
+            if (card.Status is "Waiting" or "Pending")
+            {
+                card.Status = "Needs review";
+                card.Error = error;
+            }
         }
     }
 
@@ -309,7 +332,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (Cards.Count == 0)
         {
             SelectedCard = null;
-            SearchStatusMessage = "Nessuna card nella lista.";
+            SearchStatusMessage = "No cards in the list.";
             SearchStatusColor = "#7EA6D9";
             return;
         }
@@ -317,7 +340,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(query))
         {
             SelectedCard = null;
-            SearchStatusMessage = "Scrivi una parola da cercare.";
+            SearchStatusMessage = "Type a word to search.";
             SearchStatusColor = "#7EA6D9";
             return;
         }
@@ -329,10 +352,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
         SelectedCard = partialMatch;
         SearchStatusMessage = partialMatch is null
-            ? "Non presente nella lista."
+            ? "Not present in the list."
             : exactMatch is null
-                ? $"Corrispondenza: {partialMatch.Word}"
-                : $"Trovata: {partialMatch.Word}";
+                ? $"Match: {partialMatch.Word}"
+                : $"Found: {partialMatch.Word}";
         SearchStatusColor = partialMatch is null ? "#F87171" : "#4ADE80";
     }
 
@@ -341,8 +364,9 @@ public partial class MainWindowViewModel : ViewModelBase
         return ex switch
         {
             InvalidOperationException => ex.Message,
-            HttpRequestException => "Non riesco a raggiungere il provider. Controlla la connessione internet, firewall/proxy e riprova.",
-            TaskCanceledException => "La richiesta e' scaduta. Aumenta il timeout nei Settings o riprova con meno parole.",
+            HttpRequestException => "The provider could not be reached. Check your internet connection, firewall/proxy, and try again.",
+            TimeoutException => ex.Message + " Increase the timeout in Settings or try smaller batches.",
+            TaskCanceledException => "The request timed out. Increase the timeout in Settings or try fewer words.",
             _ => ex.Message
         };
     }

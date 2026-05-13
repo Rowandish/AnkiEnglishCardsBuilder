@@ -10,7 +10,7 @@ public sealed class CardEnrichmentProviderFactory
         return settings.Provider switch
         {
             "OpenAI" => new OpenAiCardEnrichmentProvider(settings.OpenAI, new HttpClient()),
-            _ => throw new NotSupportedException($"Provider '{settings.Provider}' non supportato.")
+            _ => throw new NotSupportedException($"Provider '{settings.Provider}' is not supported.")
         };
     }
 }
